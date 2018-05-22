@@ -126,10 +126,13 @@ var Skeets = {
 };
 
 var Game = {
-	COMPLETED: 0,
-	OVER: 1,
+	COMPLETED: 1,
+	INTRO: 2,
+	FLAG: 2,
+	OVER: 3,
 	
 	state: () => {
+		if(Game.FLAG) 			return Game.FLAG;
 		if(Player.LIVES ===  0) return Game.OVER;
 		if(Player.LEVEL === 10) return Game.COMPLETED;
 	},
@@ -147,23 +150,24 @@ var Game = {
 		Ball.SPEED_X = 4;
 
 		Paddle.WIDTH = 60;
+
+		Game.set_flag(Game.INTRO);
 	},
 
 	message: (type) => {
 		switch(type) {
+		case Game.INTRO:
+			text("INTRO HERE!", 30, 150);
+			break;
+
 		case Game.COMPLETED:
 			text("Congratulations!", 30, 150);
-
 			break;
 		
 		case Game.OVER:
 			text("Game Over. You suck!", 30, 150);
-			text("Score: " + Player.SCORE, 30, 210);
-			text("Level: " + Player.TITLE[Player.LEVEL - 1], 30, 230);
-
-			/* fall through */
-		
-		default:
+			text("Score  " + Player.SCORE, 30, 210);
+			text("Level  " + Player.TITLE[Player.LEVEL - 1], 30, 230);
 			break;
 		}
 	},
@@ -173,13 +177,17 @@ var Game = {
 		textSize(15);
 		textFont("Monospace");
 
-    	text("score: " + Player.SCORE, 30, 30);
+		text("XP " + Player.SCORE, 30, 50);
+		text(Player.TITLE[Player.LEVEL - 1], 30, 30);
     	text("<3 ".repeat(Player.LIVES), 300 + 27 * (3 - Player.LIVES), 30);
-    	text(Player.TITLE[Player.LEVEL - 1], 30, 45);
 
     	// debug
     	//text("speed_x: " + Math.abs(Ball.SPEED_X), 30, 60);
     	//text("speed_y: " + Math.abs(Ball.SPEED_Y), 30, 75);
+	},
+
+	set_flag: (flag) => {
+		Game.FLAG = flag;
 	},
 
 	run: () => {
@@ -228,12 +236,19 @@ function random(min, max) {
 function setup() {
     createCanvas(400, 400);
     noStroke();
+    fill(0xffffff);
 }
 
 function draw() {
     background(0); // clear screen
 
     switch(Game.state()) {
+    case Game.INTRO:
+    	Game.message(Game.INTRO);
+    	if(keyCode === 32)
+    		Game.set_flag(false); // remove intro flag
+    	break;
+    
     case Game.COMPLETED:
     	Game.message(Game.COMPLETED);
     	if(keyCode === 32) 
